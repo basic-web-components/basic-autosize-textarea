@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "quetzal-element": "JanMiksovsky/quetzal-element#master"
+    "basic-element": "basic-web-components/basic-element#master"
   },
   "ignore": [
     "**/.*"
