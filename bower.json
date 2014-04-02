@@ -1,9 +1,9 @@
 {
-  "name": "quetzal-auto-size-text-box",
-  "description": "A text box that makes itself big enough to show its content",
+  "name": "basic-autosize-textarea",
+  "description": "A text area that makes itself big enough to show its content",
   "version": "0.0.1",
-  "private": true,
   "license": "MIT",
+  "main": "basic-autosize-textarea.html",
   "dependencies": {
     "basic-element": "basic-web-components/basic-element#master"
   },
