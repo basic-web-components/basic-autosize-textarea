@@ -107,7 +107,7 @@ Polymer( "basic-autosize-textarea", {
     this.innerHTML = this._escapeHtml( this.$.textBox.value );
   },
 
-  attachedCallback: function() {
+  attached: function() {
 
     // For auto-sizing to work, we need the text copy to have the same border,
     // padding, and other relevant characteristics as the original text area.
