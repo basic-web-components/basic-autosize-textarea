@@ -6,13 +6,16 @@
  * grow in size; the expanding copy will expand the container, which in turn
  * stretch the text area.
  *
+ * NOTE: This component can currently flash on polyfilled browsers, especially
+ * desktop and mobile Safari.
+ *
  * @class basic-autosize-textarea
  */
 -->
 
 <link rel="import" href="../basic-element/basic-element.html">
 
-<polymer-element name="basic-autosize-textarea" extends="basic-element" attributes="minimumLines placeholder">
+<polymer-element name="basic-autosize-textarea" extends="basic-element" attributes="minimumRows placeholder">
 
 <template>
 
@@ -23,6 +26,20 @@
 
   #container {
     position: relative;
+  }
+
+  /*
+   * HACK: In polyfilled browsers, text typed in the box has the potential be
+   * briefly visible as a text node before it's distributed into the hidden text
+   * copy. To help prevent that text from flashing, we define a rule to make all
+   * text transparent, then override this rule to target all children (but NOT
+   * text nodes) to restore their color.
+   */
+  :host {
+    color: transparent;
+  }
+  :host > * {
+    color: inherit;
   }
 
   /*
@@ -152,17 +169,19 @@ Polymer( "basic-autosize-textarea", {
   },
 
   /**
-   * Determines the minimum height of the text box in lines.
+   * Determines the minimum number of rows in the textarea. This is similar to
+   * the rows attribute on a standard textarea, but because the textarea can
+   * grow, is expressed as a minimum rather than a fixed number.
    *
-   * @attribute minimumLines
+   * @attribute minimumRows
    * @type integer
    * @default 1
    */
-  minimumLines: 1,
+  minimumRows: 1,
 
-  // BUG: Setting the minimumLines attribute after creation doesn't seem to
+  // BUG: Setting the minimumRows attribute after creation doesn't seem to
   // trigger this changed handler.
-  minimumLinesChanged: function() {
+  minimumRowsChanged: function() {
     if ( this._lineHeight ) {
       this._setMinimumHeight();
     }
@@ -219,7 +238,7 @@ Polymer( "basic-autosize-textarea", {
     }
   },
 
-  // Setting the minimumLines attribute translates into setting the minimum
+  // Setting the minimumRows attribute translates into setting the minimum
   // height on the text copy.
   _setMinimumHeight: function() {
     var textCopy = this.$.textCopy;
@@ -229,7 +248,7 @@ Polymer( "basic-autosize-textarea", {
     var paddingBottom = parseFloat( style.paddingBottom );
     var innerHeight = textCopy.clientHeight - paddingTop - paddingBottom;
     var bordersPlusPadding = outerHeight - innerHeight;
-    var minHeight = ( this.minimumLines * this._lineHeight ) + bordersPlusPadding;
+    var minHeight = ( this.minimumRows * this._lineHeight ) + bordersPlusPadding;
     textCopy.style.minHeight = minHeight + "px";
   },
 
