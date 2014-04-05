@@ -10,12 +10,29 @@
  * desktop and mobile Safari.
  *
  * @class basic-autosize-textarea
+
+TODO
+Use extraSpace to measure line height, remove extraLine.
+Autosize when value is changed programmatically
+Absorb textContent on ready/attached
+Remove basic-element inheritance
+
  */
 -->
 
 <link rel="import" href="../basic-element/basic-element.html">
 
-<polymer-element name="basic-autosize-textarea" extends="basic-element" attributes="minimumRows placeholder">
+<polymer-element name="basic-autosize-textarea" extends="basic-element" attributes="minimumRows placeholder value">
+
+<!--
+The template uses a pre element to hold the copied text in order to
+automatically convert breaks, etc.
+
+This pre contains an extraSpace element that ensures that, even if the last
+line of the text box is blank, there will be something in the line that forces
+the text copy to grow by a line. This extra space is a thin space, to reduce the
+amount by which the text copy will prematurely grow.
+-->
 
 <template>
 
@@ -24,22 +41,8 @@
     display: block;
   }
 
-  #container {
+  #autoSizeContainer {
     position: relative;
-  }
-
-  /*
-   * HACK: In polyfilled browsers, text typed in the box has the potential be
-   * briefly visible as a text node before it's distributed into the hidden text
-   * copy. To help prevent that text from flashing, we define a rule to make all
-   * text transparent, then override this rule to target all children (but NOT
-   * text nodes) to restore their color.
-   */
-  :host {
-    color: transparent;
-  }
-  :host > * {
-    color: inherit;
   }
 
   /*
@@ -47,7 +50,7 @@
    * metrics, so that text will lay out the same in both of them.
    */
   #textBox,
-  #textCopy {
+  #copyContainer {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     font-family: inherit;
@@ -60,6 +63,7 @@
 
   #textBox {
     height: 100%;
+    /*left: 100px;*/
     overflow: hidden;
     position: absolute;
     resize: none;
@@ -67,36 +71,21 @@
     width: 100%;
   }
 
-  #textCopy {
-    border-style: solid;
+  #copyContainer {
     visibility: hidden;
-    width: 100%;
     white-space: pre-wrap; /* So lines wrap */
+  }
+
+  #sampleLine {
+    position: absolute;
+    visibility: hidden;
   }
   </style>
 
-  <div id="container">
-    <textarea id="textBox" on-keypress="{{_keypress}}" on-keyup="{{autoSize}}" placeholder="{{placeholder}}" spellcheck="{{spellcheck}}"></textarea>
-    <!--
-    Use a pre element to hold the copied text in order to automatically convert
-    breaks, etc.
-
-    This pre contains two additional elements:
-    1. The extraSpace element helps reduce jerkiness during typing. Without it,
-    if the user is typing near the end of the line, they may see the text jerk
-    up before the text box gets a chance to grow.  The extra space below is an
-    *em space*, which should be about as wide as the widest character (in
-    English, anyway). With that, when the user is within striking distance of
-    the end of the line, the text box will grow by a new line. The wider we make
-    this extra space, the less chance the user will see that jerkiness. The
-    trade-off is that the user will also see more false positives: cases where
-    the text box grows an extra line taller than it needs to be.
-
-    2. The extraLine element exists to deal with the fact that, if the user
-    presses the Enter key, the text box's value will move before the complete
-    text is available. See notes at _keypress.
-    -->
-    <pre id="textCopy"><content></content><span id="extraSpace">&emsp;</span><div id="extraLine">&nbsp;</div></pre>
+  <div id="autoSizeContainer">
+    <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" spellcheck="{{spellcheck}}" value="{{value}}"></textarea>
+    <pre id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span></pre>
+    <div id="sampleLine">&nbsp;</div>
   </div>
 
 </template>
@@ -111,17 +100,13 @@ Polymer( "basic-autosize-textarea", {
    * @method autoSize
    */
   autoSize: function() {
-    // If we had speculatively added an extra line because of an Enter keypress,
-    // we can now hide the extra line.
-    this.$.extraLine.style.display = "none" ;
-
     // We resize by copying the text box contents to the element itself; the
     // text will then appear (via <content>) inside the invisible <pre>. If
     // we've set things up correctly, this new content should take up the same
     // amount of room as the same text in the text box. Updating the element's
     // content adjusts the element's size, which in turn will make the text box
     // the correct height.
-    this.innerHTML = this._escapeHtml( this.$.textBox.value );
+    this.$.textCopy.textContent = this._escapeHtml( this.$.textBox.value );
   },
 
   attached: function() {
@@ -131,15 +116,19 @@ Polymer( "basic-autosize-textarea", {
     // Since those aspects are affected by CSS, we have to wait until the
     // element is in the document before we can update the text copy.
     var textBoxStyle = getComputedStyle( this.$.textBox );
-    var textCopyStyle = this.$.textCopy.style;
-    textCopyStyle.borderBottomWidth  = textBoxStyle.borderBottomWidth;
-    textCopyStyle.borderLeftWidth    = textBoxStyle.borderLeftWidth;
-    textCopyStyle.borderRightWidth   = textBoxStyle.borderRightWidth;
-    textCopyStyle.borderTopWidth     = textBoxStyle.borderTopWidth;
-    textCopyStyle.paddingBottom      = textBoxStyle.paddingBottom;
-    textCopyStyle.paddingLeft        = textBoxStyle.paddingLeft;
-    textCopyStyle.paddingRight       = textBoxStyle.paddingRight;
-    textCopyStyle.paddingTop         = textBoxStyle.paddingTop;
+    var copyContainerStyle = this.$.copyContainer.style;
+    copyContainerStyle.borderBottomStyle  = textBoxStyle.borderBottomStyle;
+    copyContainerStyle.borderBottomWidth  = textBoxStyle.borderBottomWidth;
+    copyContainerStyle.borderLeftStyle    = textBoxStyle.borderLeftStyle;
+    copyContainerStyle.borderLeftWidth    = textBoxStyle.borderLeftWidth;
+    copyContainerStyle.borderRightStyle   = textBoxStyle.borderRightStyle;
+    copyContainerStyle.borderRightWidth   = textBoxStyle.borderRightWidth;
+    copyContainerStyle.borderTopStyle     = textBoxStyle.borderTopStyle;
+    copyContainerStyle.borderTopWidth     = textBoxStyle.borderTopWidth;
+    copyContainerStyle.paddingBottom      = textBoxStyle.paddingBottom;
+    copyContainerStyle.paddingLeft        = textBoxStyle.paddingLeft;
+    copyContainerStyle.paddingRight       = textBoxStyle.paddingRight;
+    copyContainerStyle.paddingTop         = textBoxStyle.paddingTop;
 
     // TODO: On Mozilla, an item which is in the document but not yet visible
     // will report its padding as zero. Since we don't know the real padding,
@@ -151,21 +140,15 @@ Polymer( "basic-autosize-textarea", {
     //   paddingTop = "2px";
     // }
 
-    // Use the extraLine member to gauge the expected height of a single line of
+    // Use the sampleLine member to gauge the expected height of a single line of
     // text. We can't use lineHeight, because that can be reported as "normal",
     // and we want to know the actual pixel height.
-    this._lineHeight = this.$.extraLine.clientHeight;
+    this._lineHeight = this.$.sampleLine.clientHeight;
 
     // Now that we know the lineheight, we can hide the extra line.
-    this.$.extraLine.style.display = "none";
+    // this.$.sampleLine.style.display = "none";
 
     this._setMinimumHeight();
-  },
-
-  contentChanged: function() {
-    if ( this.innerHTML !== this.$.textBox.value ) {
-      this.$.textBox.value = this._unescapeHtml( this.innerHTML );
-    }
   },
 
   /**
@@ -191,11 +174,13 @@ Polymer( "basic-autosize-textarea", {
     this.super();
     this.$.textBox.addEventListener( "change", function() {
       console.log( "change" );
-      this.autoSize();
+      // this.autoSize();
       // Raise our own change event (since change events aren't automatically
       // retargetted).
       this.dispatchEvent( new CustomEvent( "change" ));
     }.bind( this ));
+
+    // this.$.textBox.value = this._unescapeHtml( this.textContent );
   },
 
   get selectionEnd() {
@@ -212,6 +197,10 @@ Polymer( "basic-autosize-textarea", {
     this.$.textBox.selectionStart = value;
   },
 
+  valueChanged: function() {
+    this.autoSize();
+  },
+
   _escapeHtml: function( html ) {
     return html
      .replace( /&/g, "&amp;" )
@@ -221,35 +210,18 @@ Polymer( "basic-autosize-textarea", {
      .replace( /'/g, "&#039;" );
   },
 
-  // Speculatively add a line to our copy of the text. We're not sure what the
-  // exact effect of typing this character will be, and at this point it's not
-  // reflected yet in the text box's content. We speculate that it will add a
-  // line to the text and size accordingly. (One other possibility is that the
-  // user's replacing a selected chunk of text with a newline.) In any event,
-  // once we get the keyup or change event, we'll make any final adjustments.
-  //
-  // TODO: If the user holds down the Enter key, we can get a bunch of keypress
-  // events before we get keyup. This causes flicker. Instead of supporting only
-  // a single extra speculative line, we should grow the speculative element to
-  // contain the number of Enter keypresses we've received.
-  _keypress: function( event ) {
-    if ( event.keyCode === 13 /* Enter */ ) {
-      this.$.extraLine.style.display = "inherit";
-    }
-  },
-
   // Setting the minimumRows attribute translates into setting the minimum
-  // height on the text copy.
+  // height on the text copy container.
   _setMinimumHeight: function() {
-    var textCopy = this.$.textCopy;
-    var outerHeight = textCopy.getBoundingClientRect().height;
-    var style = getComputedStyle( textCopy );
+    var copyContainer = this.$.copyContainer;
+    var outerHeight = copyContainer.getBoundingClientRect().height;
+    var style = getComputedStyle( copyContainer );
     var paddingTop = parseFloat( style.paddingTop );
     var paddingBottom = parseFloat( style.paddingBottom );
-    var innerHeight = textCopy.clientHeight - paddingTop - paddingBottom;
+    var innerHeight = copyContainer.clientHeight - paddingTop - paddingBottom;
     var bordersPlusPadding = outerHeight - innerHeight;
     var minHeight = ( this.minimumRows * this._lineHeight ) + bordersPlusPadding;
-    textCopy.style.minHeight = minHeight + "px";
+    copyContainer.style.minHeight = minHeight + "px";
   },
 
   _unescapeHtml: function( html ) {
