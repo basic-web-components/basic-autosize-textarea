@@ -8,11 +8,6 @@
  *
  *
  * @class basic-autosize-textarea
-
-TODO
-Autosize when value is changed programmatically
-Absorb textContent on ready/attached
-Update when contentChanged
  */
 -->
 
@@ -139,6 +134,28 @@ Polymer( "basic-autosize-textarea", {
     this._setMinimumHeight();
   },
 
+  // Normally the value of the element is set and read through its value
+  // attribute. As a convenience, and to mirror standard textarea behavior,
+  // it is possible to set the content of the textarea by including text between
+  // the opening and closing tag. This works only in one direction: setting
+  // the tag content updates the textarea, but user edits in the textarea are
+  // not reflected in the tag content. A standard textarea will only use this
+  // tag content as the initial content; updates to tag content do not get
+  // reflected in the textarea. This element, however, allows later changes to
+  // tag content to update the textarea. (There doesn't seem to be a downside to
+  // doing so.
+  contentChanged: function() {
+    var text = this.textContent;
+    if ( text[0] === "\n" ) {
+      // Special case: if the first character of a standard textarea's content
+      // is a newline, it's ignored and will not appear in the textarea. HTML
+      // authors often place the tag content on a new line below the tag, and
+      // that initial new line is often undesirable.
+      text = text.slice( 1 );
+    }
+    this.value = this._unescapeHtml( text );
+  },
+
   /**
    * Determines the minimum number of rows in the textarea. This is similar to
    * the rows attribute on a standard textarea, but because the textarea can
@@ -167,8 +184,6 @@ Polymer( "basic-autosize-textarea", {
       // retargetted).
       this.dispatchEvent( new CustomEvent( "change" ));
     }.bind( this ));
-
-    // this.$.textBox.value = this._unescapeHtml( this.textContent );
   },
 
   get selectionEnd() {
@@ -186,7 +201,6 @@ Polymer( "basic-autosize-textarea", {
   },
 
   valueChanged: function() {
-    console.log( "valueChanged: " + this.value );
     this.autoSize();
   },
 
