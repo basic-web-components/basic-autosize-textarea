@@ -6,17 +6,13 @@
  * grow in size; the expanding copy will expand the container, which in turn
  * stretch the text area.
  *
- * NOTE: This component can currently flash on polyfilled browsers, especially
- * desktop and mobile Safari.
  *
  * @class basic-autosize-textarea
 
 TODO
-Use extraSpace to measure line height, remove extraLine.
 Autosize when value is changed programmatically
 Absorb textContent on ready/attached
-Remove basic-element inheritance
-
+Update when contentChanged
  */
 -->
 
@@ -29,9 +25,13 @@ The template uses a pre element to hold the copied text in order to
 automatically convert breaks, etc.
 
 This pre contains an extraSpace element that ensures that, even if the last
-line of the text box is blank, there will be something in the line that forces
+line of the textarea is blank, there will be something in the line that forces
 the text copy to grow by a line. This extra space is a thin space, to reduce the
 amount by which the text copy will prematurely grow.
+
+The pre also contains an extraLine element exists to deal with the fact that, if
+the user presses the Enter key down, the textarea's content will move before the
+complete text is available. See notes at _keypress.
 -->
 
 <template>
@@ -75,17 +75,11 @@ amount by which the text copy will prematurely grow.
     visibility: hidden;
     white-space: pre-wrap; /* So lines wrap */
   }
-
-  #sampleLine {
-    position: absolute;
-    visibility: hidden;
-  }
   </style>
 
   <div id="autoSizeContainer">
     <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" spellcheck="{{spellcheck}}" value="{{value}}"></textarea>
-    <pre id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span></pre>
-    <div id="sampleLine">&nbsp;</div>
+    <pre id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></pre>
   </div>
 
 </template>
@@ -94,19 +88,23 @@ amount by which the text copy will prematurely grow.
 Polymer( "basic-autosize-textarea", {
 
   /**
-   * Resize the element such that the text box can exactly contain its content.
+   * Resize the element such that the textarea can exactly contain its content.
    * By default, this method is invoked whenever the text content changes.
    *
    * @method autoSize
    */
   autoSize: function() {
-    // We resize by copying the text box contents to the element itself; the
+    // If we had speculatively added an extra line because of an Enter keypress,
+    // we can now hide the extra line.
+    this.$.extraLine.style.display = "none" ;
+
+    // We resize by copying the textarea contents to the element itself; the
     // text will then appear (via <content>) inside the invisible <pre>. If
     // we've set things up correctly, this new content should take up the same
-    // amount of room as the same text in the text box. Updating the element's
-    // content adjusts the element's size, which in turn will make the text box
+    // amount of room as the same text in the textarea. Updating the element's
+    // content adjusts the element's size, which in turn will make the textarea
     // the correct height.
-    this.$.textCopy.textContent = this._escapeHtml( this.$.textBox.value );
+    this.$.textCopy.textContent = this._escapeHtml( this.value );
   },
 
   attached: function() {
@@ -130,23 +128,13 @@ Polymer( "basic-autosize-textarea", {
     copyContainerStyle.paddingRight       = textBoxStyle.paddingRight;
     copyContainerStyle.paddingTop         = textBoxStyle.paddingTop;
 
-    // TODO: On Mozilla, an item which is in the document but not yet visible
-    // will report its padding as zero. Since we don't know the real padding,
-    // we need to take a guess that it's the standard padding.
-    // if (paddingBottom === "0px" && paddingLeft === "0px" && paddingRight === "0px" && paddingTop === "0px") {
-    //   paddingBottom = "2px";
-    //   paddingLeft = "2px";
-    //   paddingRight = "2px";
-    //   paddingTop = "2px";
-    // }
-
-    // Use the sampleLine member to gauge the expected height of a single line of
+    // Use the extraLine member to gauge the expected height of a single line of
     // text. We can't use lineHeight, because that can be reported as "normal",
     // and we want to know the actual pixel height.
-    this._lineHeight = this.$.sampleLine.clientHeight;
+    this._lineHeight = this.$.extraLine.clientHeight;
 
     // Now that we know the lineheight, we can hide the extra line.
-    // this.$.sampleLine.style.display = "none";
+    this.$.extraLine.style.display = "none";
 
     this._setMinimumHeight();
   },
@@ -198,6 +186,7 @@ Polymer( "basic-autosize-textarea", {
   },
 
   valueChanged: function() {
+    console.log( "valueChanged: " + this.value );
     this.autoSize();
   },
 
@@ -208,6 +197,23 @@ Polymer( "basic-autosize-textarea", {
      .replace( />/g, "&gt;" )
      .replace( /"/g, "&quot;" )
      .replace( /'/g, "&#039;" );
+  },
+
+  // Speculatively add a line to our copy of the text. We're not sure what the
+  // exact effect of typing this character will be, and at this point it's not
+  // reflected yet in the textarea's content. We speculate that it will add a
+  // line to the text and size accordingly. (One other possibility is that the
+  // user's replacing a selected chunk of text with a newline.) In any event,
+  // once we get the keyup or change event, we'll make any final adjustments.
+  //
+  // TODO: If the user holds down the Enter key, we can get a bunch of keypress
+  // events before we get keyup. This causes flicker. Instead of supporting only
+  // a single extra speculative line, we should grow the speculative element to
+  // contain the number of Enter keypresses we've received.
+  _keypress: function( event ) {
+    if ( event.keyCode === 13 /* Enter */ ) {
+      this.$.extraLine.style.display = "inherit";
+    }
   },
 
   // Setting the minimumRows attribute translates into setting the minimum
