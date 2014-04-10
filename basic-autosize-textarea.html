@@ -178,8 +178,6 @@ Polymer( "basic-autosize-textarea", {
   ready: function() {
     this.super();
     this.$.textBox.addEventListener( "change", function() {
-      console.log( "change" );
-      // this.autoSize();
       // Raise our own change event (since change events aren't automatically
       // retargetted).
       this.dispatchEvent( new CustomEvent( "change" ));
