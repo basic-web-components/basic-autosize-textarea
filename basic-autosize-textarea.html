@@ -239,6 +239,7 @@ Polymer( "basic-autosize-textarea", {
     var innerHeight = copyContainer.clientHeight - paddingTop - paddingBottom;
     var bordersPlusPadding = outerHeight - innerHeight;
     var minHeight = ( this.minimumRows * this._lineHeight ) + bordersPlusPadding;
+    minHeight = Math.ceil( minHeight );
     copyContainer.style.minHeight = minHeight + "px";
   },
 
