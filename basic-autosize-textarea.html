@@ -6,8 +6,7 @@
  * grow in size; the expanding copy will expand the container, which in turn
  * stretch the text area.
  *
- *
- * @class basic-autosize-textarea
+ * @element basic-autosize-textarea
  */
 -->
 
@@ -157,9 +156,9 @@ Polymer( "basic-autosize-textarea", {
   },
 
   /**
-   * Determines the minimum number of rows in the textarea. This is similar to
-   * the rows attribute on a standard textarea, but because the textarea can
-   * grow, is expressed as a minimum rather than a fixed number.
+   * Determines the minimum number of rows show. This is similar to the rows
+   * attribute on a standard textarea, but because this element can grow, is
+   * expressed as a minimum rather than a fixed number.
    *
    * @attribute minimumRows
    * @type integer
@@ -174,6 +173,14 @@ Polymer( "basic-autosize-textarea", {
       this._setMinimumHeight();
     }
   },
+
+  /**
+   * A prompt shown when the field is empty to indicate what the user should enter.
+   *
+   * @attribute placeholder
+   * @type string
+   */
+  placeholder: null,
 
   ready: function() {
     this.super();
