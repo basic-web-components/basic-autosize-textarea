@@ -104,6 +104,8 @@ Polymer( "basic-autosize-textarea", {
 
   attached: function() {
 
+    this.super();
+
     // For auto-sizing to work, we need the text copy to have the same border,
     // padding, and other relevant characteristics as the original text area.
     // Since those aspects are affected by CSS, we have to wait until the
