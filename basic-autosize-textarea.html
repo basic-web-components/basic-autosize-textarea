@@ -151,19 +151,14 @@ Polymer( "basic-autosize-textarea", {
   // level and remove any indentation whitespace.
   contentChanged: function() {
     var text = this.textContent;
-    if ( text[0] === "\n" ) {
-      // Special case: if the first character of a standard textarea's content
-      // is a newline, it's ignored and will not appear in the textarea. HTML
-      // authors often place the tag content on a new line below the tag, and
-      // that initial new line is often undesirable.
-      text = text.slice( 1 );
-    }
-    if ( text[ text.length - 1 ] === "\n" ) {
-      // Special case: As a non-standard feature, we also cut off the last
-      // character if that's a newline. Again, people often want to have the
-      // element's closing tag on a new line.
-      text = text.slice( 0, text.length - 1 );
-    }
+
+    // Trim the text.
+    // This is non-standard textarea behavior. A standard textarea will trim the
+    // first character if it's a newline, but that's it. However,  authors will
+    // want to be able to place the opening and closing tags on their own lines.
+    // So it seems more helpful to trim whitespace on either side.
+    text = text.trim();
+    
     this.value = this._unescapeHtml( text );
   },
 

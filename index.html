@@ -4,10 +4,10 @@
 
 <meta charset="utf-8">
 <title>basic-autosize-textarea</title>
-<script src="../platform/platform.js"></script>
 
-<!-- Keep example fragment in separate file so it can be used independently. -->
-<link id="demoImport" rel="import" href="example.html">
+<script src="../platform/platform.js"></script>
+<link rel="import" href="../basic-framed-content/basic-framed-content.html">
+<link rel="import" href="basic-autosize-textarea.html">
 
 <style>
 body,
@@ -22,15 +22,14 @@ body {
 }
 </style>
 
-<script>
-document.querySelector( "#demoImport" ).addEventListener( "load", function() {
-  document.body.innerHTML = this.import.querySelector( "body" ).innerHTML;
-});
-</script>
-
 </head>
 
-<body>
+<body unresolved>
+  <basic-framed-content>
+    <basic-autosize-textarea minimumRows="2">
+      Type all you want here!
+    </basic-autosize-textarea>
+  </basic-framed-content>
 </body>
 
 </html>
