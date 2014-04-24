@@ -13,7 +13,7 @@
 
 <link rel="import" href="../basic-element/basic-element.html">
 
-<polymer-element name="basic-autosize-textarea" extends="basic-element" attributes="minimumRows placeholder value">
+<polymer-element name="basic-autosize-textarea" extends="basic-element">
 
 <!--
 The template uses a pre element to hold the copied text in order to
@@ -188,6 +188,21 @@ Polymer( "basic-autosize-textarea", {
    * @type string
    */
   placeholder: null,
+
+  publish: {
+    minimumRows: {
+      reflect: true
+    },
+    placeholder: {
+      reflect: true
+    },
+    spellcheck: {
+      reflect: true
+    },
+    value: {
+      reflect: true
+    }
+  },
 
   ready: function() {
     this.super();
