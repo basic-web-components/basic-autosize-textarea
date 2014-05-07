@@ -57,7 +57,6 @@ complete text is available. See notes at _keypress.
 
   #textBox {
     height: 100%;
-    /*left: 100px;*/
     overflow: hidden;
     position: absolute;
     resize: none;
@@ -103,6 +102,8 @@ Polymer( "basic-autosize-textarea", {
 
   attached: function() {
 
+    console.log( getComputedStyle( this.$.textBox ).paddingTop );
+    console.log( getComputedStyle( this.$.textBox ).paddingTop );
     this.super();
 
     // For auto-sizing to work, we need the text copy to have the same border,
