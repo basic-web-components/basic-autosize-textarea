@@ -66,8 +66,7 @@ complete text is available. See notes at _keypress.
   #copyContainer {
     visibility: hidden;
     white-space: pre-wrap; /* So lines wrap */
-    word-break: break-all; /* For Mozilla, which doesn't support break-word yet */
-    word-break: break-word; /* So lines with no spaces wrap */
+    word-wrap: break-word; /* So we break at word boundaries when possible */
   }
   </style>
 
