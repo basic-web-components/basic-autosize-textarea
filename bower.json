@@ -7,7 +7,7 @@
   "dependencies": {
     "basic-element": "basic-web-components/basic-element#master"
   },
-  "dev-dependencies": {
+  "devDependencies": {
     "basic-framed-content": "basic-web-components/basic-framed-content#master"
   },
   "keywords": [
