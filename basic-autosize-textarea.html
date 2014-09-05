@@ -160,17 +160,6 @@ Polymer({
     this.value = this._unescapeHtml( text );
   },
 
-  /**
-   * Determines the minimum number of rows show. This is similar to the rows
-   * attribute on a standard textarea, but because this element can grow, is
-   * expressed as a minimum rather than a fixed number.
-   *
-   * @attribute minimumRows
-   * @type number
-   * @default 1
-   */
-  minimumRows: 1,
-
   // BUG: Setting the minimumRows attribute after creation doesn't seem to
   // trigger this changed handler.
   minimumRowsChanged: function() {
@@ -179,24 +168,43 @@ Polymer({
     }
   },
 
-  /**
-   * A prompt shown when the field is empty to indicate what the user should enter.
-   *
-   * @attribute placeholder
-   * @type string
-   */
-  placeholder: null,
-
   publish: {
+
+    /**
+     * Determines the minimum number of rows shown. This is similar to the rows
+     * attribute on a standard textarea, but because this element can grow, is
+     * expressed as a minimum rather than a fixed number.
+     *
+     * @attribute minimumRows
+     * @type number
+     * @default 1
+     */
     minimumRows: {
-      reflect: true
+      reflect: true,
+      value: 1
     },
+
+    /**
+     * A prompt shown when the field is empty to indicate what the user should enter.
+     *
+     * @attribute placeholder
+     * @type string
+     */
     placeholder: {
-      reflect: true
+      reflect: true,
+      value: ""
     },
+
+    /**
+     * The text shown in the textarea.
+     *
+     * @attribute value
+     * @type string
+     */
     value: {
       reflect: true
     }
+
   },
 
   ready: function() {
