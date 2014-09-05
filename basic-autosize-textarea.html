@@ -160,8 +160,6 @@ Polymer({
     this.value = this._unescapeHtml( text );
   },
 
-  // BUG: Setting the minimumRows attribute after creation doesn't seem to
-  // trigger this changed handler.
   minimumRowsChanged: function() {
     if ( this._lineHeight ) {
       this._setMinimumHeight();
