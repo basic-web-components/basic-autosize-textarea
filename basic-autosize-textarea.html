@@ -71,7 +71,7 @@ complete text is available. See notes at _keypress.
   </style>
 
   <div id="autoSizeContainer">
-    <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" spellcheck="{{spellcheck}}" value="{{value}}"></textarea>
+    <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" value="{{value}}"></textarea>
     <pre id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></pre>
   </div>
 
@@ -192,9 +192,6 @@ Polymer({
       reflect: true
     },
     placeholder: {
-      reflect: true
-    },
-    spellcheck: {
       reflect: true
     },
     value: {
