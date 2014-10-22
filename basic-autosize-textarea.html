@@ -14,17 +14,14 @@ stretch the text area.
 <polymer-element name="basic-autosize-textarea" extends="basic-element">
 
 <!--
-The template uses a pre element to hold the copied text in order to
-automatically convert breaks, etc.
+The invisible div contains an extraSpace element that ensures that, even if the
+last line of the textarea is blank, there will be something in the line that
+forces the text copy to grow by a line. This extra space is a thin space, to
+reduce the amount by which the text copy will prematurely grow.
 
-This pre contains an extraSpace element that ensures that, even if the last
-line of the textarea is blank, there will be something in the line that forces
-the text copy to grow by a line. This extra space is a thin space, to reduce the
-amount by which the text copy will prematurely grow.
-
-The pre also contains an extraLine element exists to deal with the fact that, if
-the user presses the Enter key down, the textarea's content will move before the
-complete text is available. See notes at _keypress.
+The invisible div also contains an extraLine element exists to deal with the
+fact that, if the user presses the Enter key down, the textarea's content will
+move before the complete text is available. See notes at _keypress.
 -->
 
 <template>
@@ -72,7 +69,7 @@ complete text is available. See notes at _keypress.
 
   <div id="autoSizeContainer">
     <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" value="{{value}}"></textarea>
-    <pre id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></pre>
+    <div id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></div>
   </div>
 
 </template>
@@ -92,12 +89,12 @@ Polymer({
     this.$.extraLine.style.display = "none" ;
 
     // We resize by copying the textarea contents to the element itself; the
-    // text will then appear (via <content>) inside the invisible <pre>. If
+    // text will then appear (via <content>) inside the invisible div. If
     // we've set things up correctly, this new content should take up the same
     // amount of room as the same text in the textarea. Updating the element's
     // content adjusts the element's size, which in turn will make the textarea
     // the correct height.
-    this.$.textCopy.textContent = this._escapeHtml( this.value );
+    this.$.textCopy.textContent = this.value;
   },
 
   attached: function() {
@@ -230,15 +227,6 @@ Polymer({
 
   valueChanged: function() {
     this.autoSize();
-  },
-
-  _escapeHtml: function( html ) {
-    return html
-     .replace( /&/g, "&amp;" )
-     .replace( /</g, "&lt;" )
-     .replace( />/g, "&gt;" )
-     .replace( /"/g, "&quot;" )
-     .replace( /'/g, "&#039;" );
   },
 
   // Speculatively add a line to our copy of the text. We're not sure what the
