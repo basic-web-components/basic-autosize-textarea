@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>seed-element</title>
+
+  <script src="../../webcomponentsjs/webcomponents.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <!-- Step 1: import the element to test -->
+  <link rel="import" href="../basic-autosize-textarea.html">
+</head>
+<body>
+
+<!-- You use the document as a place to set up your fixtures. -->
+<basic-autosize-textarea></basic-autosize-textarea>
+
+<script>
+  var element = document.querySelector('basic-autosize-textarea');
+
+  suite('<basic-autosize-textarea>', function() {
+
+    test('defines the minimumRows property', function() {
+      assert.equal(element.minimumRows, 1);
+    });
+
+  });
+</script>
+
+</body>
+</html>
