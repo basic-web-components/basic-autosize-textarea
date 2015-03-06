@@ -17,11 +17,17 @@
   <basic-autosize-textarea id="bat1"></basic-autosize-textarea>
   <basic-autosize-textarea id="bat2" minimumRows="10">Hello, world</basic-autosize-textarea>
   <basic-autosize-textarea id="bat3" placeholder="Placeholder text"></basic-autosize-textarea>
+  <basic-autosize-textarea id="bat4"></basic-autosize-textarea>
+  <basic-autosize-textarea id="bat5"></basic-autosize-textarea>
+  <basic-autosize-textarea id="bat6"></basic-autosize-textarea>
 
   <script>
   var bat1 = document.querySelector('#bat1');
   var bat2 = document.querySelector('#bat2');
   var bat3 = document.querySelector('#bat3');
+  var bat4 = document.querySelector('#bat4');
+  var bat5 = document.querySelector('#bat5');
+  var bat6 = document.querySelector('#bat6');
 
   suite('basic', function() {
 
@@ -31,14 +37,16 @@
       done();
     });
 
-    test('placeholder', function(done) {
-      assert.equal(bat3.placeholder, "Placeholder text");
-      assert.notEqual(bat3.value, "Placeholder text");
+    test('value', function(done) {
+      assert.equal(bat2.value, "Hello, world");
       done();
     });
 
-    test('value', function(done) {
-      assert.equal(bat2.value, "Hello, world");
+    test('minimumRows can make element taller than required to fit content', function(done) {
+      // Confirm minimumRows can make the element taller than is required just to fit the content
+      assert.equal(bat2.minimumRows, 10);
+      assert.equal(bat2.value, 'Hello, world');
+      assert(bat2.$.textBox.clientHeight > 2 * bat1.$.textBox.clientHeight);
       done();
     });
 
@@ -49,6 +57,43 @@
         assert.equal(bat2.value, newContent);
         done();
       });
+    });
+
+    test('autosize works when content is HTML', function(done) {
+      // Confirm autosize works when content is HTML
+      bat4.value = '<html>\n<body>\n<p>\nThis is a test\n</p>\n<div>\nSome more tests\n</div>\n</body>\n</html>';
+      flush(function() {
+        assert(bat4.$.textBox.clientHeight > 2 * bat1.$.textBox.clientHeight);
+        done();
+      });
+    });
+
+    test('autosize works with text wrapping', function(done) {
+      bat5.value = 'Lots of words to force wrapping. Lots of words to force wrapping. ' +
+      'Lots of words to force wrapping. Lots of words to force wrapping. Lots of words to force wrapping. ' +
+      'Lots of words to force wrapping. Lots of words to force wrapping. Lots of words to force wrapping. ' +
+      'Lots of words to force wrapping. Lots of words to force wrapping. Lots of words to force wrapping. ' +
+      'Lots of words to force wrapping. Lots of words to force wrapping. Lots of words to force wrapping. ';
+
+      flush(function() {
+        assert(bat5.$.textBox.clientHeight > 2 * bat1.$.textBox.clientHeight);
+        done();
+      });
+    });
+
+    test('autosize works with long string with no whitespace', function(done) {
+      bat6.value = 'sadf;lksadfjl;sdfjl;ksjdfkjsd;lfjsdlkfjksdjfosadjflwemrflkwefoawefowmefomwefomowefomweofmwqefmwoqemfowqefomwqefoiwemfomwqeofkmwefomwerfklasjdlmwefoqwkemfwqemfowqmefowqmefowmefowqemfowemfowqemfwoefokwqmefokmwerfokmwefwoqemfowqmefokqwmefowqefowqmefoqwemfowemfomweofijweoirulwemfkwejfoijewtjoiqhewfknwerofijqewrotmerfomoewfqweofmqweofjqweofmweomwqeorjqweoifmqwoefqoewfmoqewfmqwoefmqwefoqwemfoiwejrtomqwdfoiqwemromqweofiwmerowqeoimwqeormwqefom';
+
+      flush(function() {
+        assert(bat6.$.textBox.clientHeight > 2 * bat1.$.textBox.clientHeight);
+        done();
+      })
+    });
+
+    test('placeholder', function(done) {
+      assert.equal(bat3.placeholder, "Placeholder text");
+      assert.notEqual(bat3.value, "Placeholder text");
+      done();
     });
 
   });
