@@ -1,21 +1,19 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <title>Tests for basic-autosize-textarea</title>
 
+  <meta charset="utf-8">
   <script src="../../webcomponentsjs/webcomponents.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../basic-autosize-textarea.html">
+
 </head>
 
 <body>
-  <script>
-  // Load and run all tests (.html, .js) as one suite:
-  WCT.loadSuites([
-    'basic.html',
-    'events.html'
-  ]);
-  </script>
+  <div id="container"></div>
+  <script src="basic.tests.js"></script>
+  <script src="events.tests.js"></script>
 </body>
+
 </html>
