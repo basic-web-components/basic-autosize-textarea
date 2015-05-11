@@ -1,14 +1,14 @@
 {
   "name": "basic-autosize-textarea",
   "description": "A text area that makes itself big enough to show its content",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "license": "MIT",
   "main": "basic-autosize-textarea.html",
   "dependencies": {
-    "basic-element": "basic-web-components/basic-element#master"
+    "basic-element": "basic-web-components/basic-element#^0.5.0"
   },
   "devDependencies": {
-    "basic-framed-content": "basic-web-components/basic-framed-content#master"
+    "basic-framed-content": "basic-web-components/basic-framed-content#^0.5.0"
   },
   "keywords": [
     "basic-web-components",
