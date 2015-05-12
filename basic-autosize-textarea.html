@@ -9,22 +9,12 @@ stretch the text area.
 @demo http://basic-web-components.github.io/components/basic-autosize-textarea/
 -->
 
-<link rel="import" href="../basic-element/basic-element.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
 
-<polymer-element name="basic-autosize-textarea" extends="basic-element">
+<script src="../basic-shared/ContentChanged.js"></script>
+<script src="../basic-shared/Generic.js"></script>
 
-<!--
-The invisible div contains an extraSpace element that ensures that, even if the
-last line of the textarea is blank, there will be something in the line that
-forces the text copy to grow by a line. This extra space is a thin space, to
-reduce the amount by which the text copy will prematurely grow.
-
-The invisible div also contains an extraLine element exists to deal with the
-fact that, if the user presses the Enter key down, the textarea's content will
-move before the complete text is available. See notes at _keypress.
--->
-
-<template>
+<dom-module id="basic-autosize-textarea">
 
   <style>
   :host {
@@ -67,74 +57,37 @@ move before the complete text is available. See notes at _keypress.
   }
   </style>
 
-  <div id="autoSizeContainer">
-    <textarea id="textBox" on-keypress="{{_keypress}}" placeholder="{{placeholder}}" value="{{value}}"></textarea>
-    <div id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></div>
-  </div>
+  <!--
+  The invisible div contains an extraSpace element that ensures that, even if the
+  last line of the textarea is blank, there will be something in the line that
+  forces the text copy to grow by a line. This extra space is a thin space, to
+  reduce the amount by which the text copy will prematurely grow.
 
-</template>
+  The invisible div also contains an extraLine element exists to deal with the
+  fact that, if the user presses the Enter key down, the textarea's content will
+  move before the complete text is available. See notes at _keypress.
+  -->
+  <template>
+    <div id="autoSizeContainer">
+      <textarea id="textBox" on-keypress="_keypress" placeholder="{{placeholder}}" value="{{value::input}}"></textarea>
+      <div id="copyContainer"><span id="textCopy"></span><span id="extraSpace">&thinsp;</span><div id="extraLine">&nbsp;</div></div>
+    </div>
+    <content></content>
+  </template>
+</dom-module>
 
 <script>
+/**
+ * Fires when the user types in the textarea.
+ *
+ * @event change
+ */
+
 Polymer({
 
-  /**
-   * Resize the element such that the textarea can exactly contain its content.
-   * By default, this method is invoked whenever the text content changes.
-   *
-   * @method autoSize
-   */
-  autoSize: function() {
-    // If we had speculatively added an extra line because of an Enter keypress,
-    // we can now hide the extra line.
-    this.$.extraLine.style.display = 'none' ;
+  is: 'basic-autosize-textarea',
 
-    // We resize by copying the textarea contents to the element itself; the
-    // text will then appear (via <content>) inside the invisible div. If
-    // we've set things up correctly, this new content should take up the same
-    // amount of room as the same text in the textarea. Updating the element's
-    // content adjusts the element's size, which in turn will make the textarea
-    // the correct height.
-    this.$.textCopy.textContent = this.value;
-  },
-
-  attached: function() {
-    this.super();
-    this._initializeWhenRendered();
-  },
-
-  // Normally the value of the element is set and read through its value
-  // attribute. As a convenience, and to mirror standard textarea behavior,
-  // it is possible to set the content of the textarea by including text between
-  // the opening and closing tag. This works only in one direction: setting
-  // the tag content updates the textarea, but user edits in the textarea are
-  // not reflected in the tag content. A standard textarea will only use this
-  // tag content as the initial content; updates to tag content do not get
-  // reflected in the textarea. This element, however, allows later changes to
-  // tag content to update the textarea. (There doesn't seem to be a downside to
-  // doing so.
-  // TODO: Normalize indentation in the text content. Users will often want to
-  // indent the markup so that it looks pretty. We should detect the indentation
-  // level and remove any indentation whitespace.
-  contentChanged: function() {
-    var text = this.textContent;
-
-    // Trim the text.
-    // This is non-standard textarea behavior. A standard textarea will trim the
-    // first character if it's a newline, but that's it. However,  authors will
-    // want to be able to place the opening and closing tags on their own lines.
-    // So it seems more helpful to trim whitespace on either side.
-    text = text.trim();
-    
-    this.value = this._unescapeHtml(text);
-  },
-
-  minimumRowsChanged: function() {
-    if (this._lineHeight) {
-      this._setMinimumHeight();
-    }
-  },
-
-  publish: {
+  properties: {
 
     /**
      * Determines the minimum number of rows shown. This is similar to the rows
@@ -146,8 +99,10 @@ Polymer({
      * @default 1
      */
     minimumRows: {
-      reflect: true,
-      value: 1
+      type: Number,
+      reflectToAttribute: true,
+      value: 1,
+      observer: 'minimumRowsChanged'
     },
 
     /**
@@ -157,7 +112,8 @@ Polymer({
      * @type string
      */
     placeholder: {
-      reflect: true,
+      type: String,
+      reflectToAttribute: true,
       value: ""
     },
 
@@ -168,13 +124,81 @@ Polymer({
      * @type string
      */
     value: {
-      reflect: true
+      type: String,
+      notify: true,
+      observer: 'valueChanged'
     }
 
   },
 
+  /**
+   * Resize the element such that the textarea can exactly contain its content.
+   * By default, this method is invoked whenever the text content changes.
+   *
+   * @method autoSize
+   */
+  autoSize: function() {
+    // If we had speculatively added an extra line because of an Enter keypress,
+    // we can now hide the extra line.
+    this.$.extraLine.style.display = 'none';
+
+    // We resize by copying the textarea contents to the element itself; the
+    // text will then appear (via <content>) inside the invisible div. If
+    // we've set things up correctly, this new content should take up the same
+    // amount of room as the same text in the textarea. Updating the element's
+    // content adjusts the element's size, which in turn will make the textarea
+    // the correct height.
+    this.$.textCopy.textContent = this.value;
+  },
+
+  // Normally the value of the element is set and read through its value
+  // attribute. As a convenience, and to mirror standard textarea behavior,
+  // it is possible to set the content of the textarea by including text between
+  // the opening and closing tag. This works only in one direction: setting
+  // the tag content updates the textarea, but user edits in the textarea are
+  // not reflected in the tag content. We capture the value of the initial text content
+  // in order to set the value property during the create event.
+  // TODO: Normalize indentation in the text content. Users will often want to
+  // indent the markup so that it looks pretty. We should detect the indentation
+  // level and remove any indentation whitespace
+  // TODO: Consider using content innerHTML rather than plain text. The native
+  // textarea element will include HTML, not just the stripped text, as initial
+  // value property text.
+  attached: function() {
+    var text = this._flattenTextAndRemoveLightDom();
+
+    // If a value is provided as part of initialization, we will not overwrite
+    // it with content. The value property takes precedence. Do not set the value
+    // here unless necessary as it will establish a lineheight of zero if set
+    // to the empty string.
+    if (!this.value && text.length) {
+      this.value = this._unescapeHtml(text);
+    }
+
+    this._initializeWhenRendered();
+  },
+
+  behaviors: [
+    Basic.ContentChanged,
+    Basic.Generic
+  ],
+
+  contentChanged: function() {
+    this.value = this._flattenTextAndRemoveLightDom();
+  },
+
+  valueChanged: function() {
+    this.autoSize();
+    this.dispatchEvent(new CustomEvent('value-changed'));
+  },
+
+  minimumRowsChanged: function() {
+    if (this._lineHeight) {
+      this._setMinimumHeight();
+    }
+  },
+
   ready: function() {
-    this.super();
     this.$.textBox.addEventListener('change', function() {
       // Raise our own change event (since change events aren't automatically
       // retargetted).
@@ -196,8 +220,18 @@ Polymer({
     this.$.textBox.selectionStart = value;
   },
 
-  valueChanged: function() {
-    this.autoSize();
+  _flattenTextAndRemoveLightDom: function() {
+    var text = this.flattenTextContent;
+    Basic.ContentHelpers.removeLightDomNodes(this);
+
+    // Trim the text.
+    // This is non-standard textarea behavior. A standard textarea will trim the
+    // first character if it's a newline, but that's it. However,  authors will
+    // want to be able to place the opening and closing tags on their own lines.
+    // So it seems more helpful to trim whitespace on either side.
+    text = text.trim();
+
+    return text;
   },
 
   // Set up once this component has been rendered.
@@ -241,6 +275,7 @@ Polymer({
     // Use the extraLine member to gauge the expected height of a single line of
     // text. We can't use lineHeight, because that can be reported as "normal",
     // and we want to know the actual pixel height.
+    this.$.extraLine.style.display = 'inherit';
     this._lineHeight = this.$.extraLine.clientHeight;
 
     // Now that we know the line height, we can hide the extra line.
@@ -291,7 +326,24 @@ Polymer({
       .replace(/&quot;/g, '\"')
       .replace(/&#039;/g, '\'');
   }
-});
-</script>
 
-</polymer-element>
+});
+
+/*
+ * The following comments document API members provided by mixins. Ideally these
+ * docs will eventually be pulled from the mixin source files, but for now are
+ * copied here by hand.
+ */
+
+/**
+ * True if the component would like to receive generic styling.
+ *
+ * This property is true by default — set it to false to turn off all
+ * generic styles. This makes it easier to apply custom styling; you won't
+ * have to explicitly override styling you don't want.
+ *
+ * @property generic
+ * @type Boolean
+ * @default true
+ */
+</script>
