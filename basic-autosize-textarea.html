@@ -10,9 +10,7 @@ stretch the text area.
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-
-<script src="../basic-shared/ContentChanged.js"></script>
-<script src="../basic-shared/Generic.js"></script>
+<link rel="import" href="../basic-shared/basic-shared.html">
 
 <dom-module id="basic-autosize-textarea">
 
@@ -89,6 +87,12 @@ Polymer({
 
   properties: {
 
+    ariaLabel: {
+      type: String,
+      reflectToAttribute: true,
+      observer: 'ariaLabelChanged'
+    },
+
     /**
      * Determines the minimum number of rows shown. This is similar to the rows
      * attribute on a standard textarea, but because this element can grow, is
@@ -129,6 +133,14 @@ Polymer({
       observer: 'valueChanged'
     }
 
+  },
+
+  /* Propagate the ARIA label to the inner textarea. */
+  ariaLabelChanged: function() {
+    // Not sure why, but using Polymer to bind the aria-label attribute of the
+    // inner input to the components ariaLabel property is insufficient. So we
+    // manually propagate label changes to the input.
+    this.$.textBox.setAttribute('aria-label', this.ariaLabel);
   },
 
   /**
